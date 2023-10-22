@@ -18,12 +18,12 @@ Os nomes que estão por padrão são: Realm = Test, Client = test-client. Caso c
 A configuração da API consiste em passar os devidos valores do parâmetro idp.
 
 idp = FastAPIKeycloak(
-    server_url="http://localhost:8085/auth",
-    client_id="test-client",
-    client_secret="Client Secret na seção Credentials do cliente que foi criado",
-    admin_client_secret="Admin Client Secret na seção Credentials do cliente admin-cli",
-    realm="Test",
-    callback_uri="http://localhost:8081/callback"
+    server_url="http://localhost:8085/auth",<br/>
+    client_id="test-client",<br/>
+    client_secret="Client Secret na seção Credentials do cliente que foi criado",<br/>
+    admin_client_secret="Admin Client Secret na seção Credentials do cliente admin-cli",<br/>
+    realm="Test",<br/>
+    callback_uri="http://localhost:8081/callback"<br/>
 )
 
 Alem disso, deve-se copiar a public key do algoritmo RS256 contida em Realm Settings > Keys
