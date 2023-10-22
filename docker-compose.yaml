@@ -2,34 +2,25 @@ version: '3'
 
 services:
   postgres:
-    image: postgres
+    image: postgres:15
     environment:
-      POSTGRES_DB: testkeycloakdb
-      POSTGRES_USER: testkeycloakuser
       POSTGRES_PASSWORD: testkeycloakpassword
-    restart:
-      always
-
+      POSTGRES_USER: testkeycloakuser
+      POSTGRES_DB: testkeycloakdb
   keycloak:
-    image: jboss/keycloak:16.1.0   
-    volumes:
-      - ./realm-export.json:/opt/jboss/keycloak/imports/realm-export.json
-    command:
-      - "-b 0.0.0.0 -Dkeycloak.profile.feature.upload_scripts=enabled -Dkeycloak.import=/opt/jboss/keycloak/imports/realm-export.json"
+    image: quay.io/keycloak/keycloak:20.0.3
     environment:
-      DB_VENDOR: POSTGRES
-      DB_ADDR: postgres
-      DB_DATABASE: testkeycloakdb
-      DB_USER: testkeycloakuser
-      DB_SCHEMA: public
-      DB_PASSWORD: testkeycloakpassword
-      KEYCLOAK_USER: keycloakuser
-      KEYCLOAK_PASSWORD: keycloakpassword
-      PROXY_ADDRESS_FORWARDING: "true"
-      KEYCLOAK_LOGLEVEL: DEBUG
+      KEYCLOAK_ADMIN: keycloakuser
+      KEYCLOAK_ADMIN_PASSWORD: keycloakpassword
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres/testkeycloakdb
+      KC_DB_USERNAME: testkeycloakuser
+      KC_DB_SCHEMA: public
+      KC_DB_PASSWORD: testkeycloakpassword
+      KC_LOG_LEVEL: debug
     ports:
-      - '8085:8080'
-    depends_on:
-      - postgres
-    restart:
-      always
+      - 8085:8080
+    command:
+      - start-dev --http-relative-path=/auth
+
+

@@ -14,15 +14,15 @@ app = FastAPI()
 idp = FastAPIKeycloak(
     server_url="http://localhost:8085/auth",
     client_id="test-client",
-    client_secret="cW7fH0sry0sh8lHYbLljrta2q6Nkyv3P",
-    admin_client_secret="blYLTpfAVyz3vuSQ45i5b2yBUSqrnrLa",
+    client_secret="NqGPUG9ynh01zRBENauRjAJFA6O8rN3X",
+    admin_client_secret="1qmHrTKnChfxSvc4WpMnAcLjISWmFrIo",
     realm="Test",
     callback_uri="http://localhost:8081/callback"
 )
 idp.add_swagger_config(app)
 
-SECRET_KEY = b'-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyLn0tfv9rxx3P5TWWjHKee/eQB3U8C88YWS7K8XoTYKsVTnUDkakMXCINeJ0u86NY866A/yzffkdm2A8XumMftT0f7/pt82vDYRrKxpc/KQaAdKTmFNkTZkXl6hjqtLH45Zgp0KuuYXMxfrpXxRN30KcLp5HwZ/aAMyb+Meh0TaU5YifDD5KxHyURE/yXUrRKbpPxzoA7VpF/JSvDNhWuOXZ/sTfeixpp9W72A0FOGErGjue5oMXxRk338ujmGT4VTqxvOezJmxnsrLVyscUTuY/JH3hNZjTsB8GMkuxoeL/FjAdCVPHQoTa0fl0tf/cDoa8DQBoOA0aahcnYsulNwIDAQAB\n-----END PUBLIC KEY-----'
-ALGORITHM = 'RS256'
+SECRET_KEY = b'-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzInP4hb/1ZtInNs0zKv7qT4PvNnyoFhmrF1sRfwZd6BrrnFjdrgHRbGsDxOuTH0OCgbmety4o6ertKOuw0Z6/QaAjE8jdNUCq5XDK+U374UFKgasvMl+PNk9KeaRBpQLWqwLo7HtHmEnSe2kfMWdGbEkfd//WKB9LiXCVql9qFp2CRweRfkZ85jDsJ0TaSS/dkC+Kthfjdp6NpnlIeno0PmZbe+FObmz2to2sLcp22y//k9bOPMN5cBBCaPNxIWFv6P+GoGALcFeyoUVMVnLK0bu5Z/2fP2+lr1vlcwibI8epIhvMFqxCo3Sy2IhKLrgGH1iA1Nubc2WkDBu6ftJ2wIDAQAB\n-----END PUBLIC KEY-----'
+ALGORITHM = 'RS256'                        
 
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='/token',
                                      scheme_name="direct_oauth2_schema")
@@ -64,7 +64,7 @@ def logout():
 async def get_current_user(token:Annotated[str, Depends(oauth2_bearer)]):
 #async def get_current_user(token:str):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, audience="account", algorithms=[ALGORITHM])
         username: str = payload.get('name')
         if username is None:
              raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -89,7 +89,7 @@ async def create_user(model: CreateUserRequest):
 def update_user(first_name:str, last_name:str, email:str,#user: KeycloakUser,
                 token:Annotated[str, Depends(oauth2_bearer)]):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, audience="account", algorithms=[ALGORITHM])
         username: str = payload.get('preferred_username')
 
         if username is None:
