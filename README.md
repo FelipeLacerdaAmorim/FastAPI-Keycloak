@@ -5,6 +5,7 @@ pip install fastapi_keycloak<br/>
 pip install pydantic==1.10.9<br/>
 pip install PyJWT<br/>
 pip install python_jose<br/>
+pip install python-multipart
 
 ## Introdução
 
