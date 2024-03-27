@@ -16,15 +16,15 @@ app = FastAPI()
 
 idp = FastAPIKeycloak(
     server_url="http://localhost:8085/",
-    client_id="test-client",
-    client_secret="R1dkfXz8PGNSQYiBGDE0MxlXPXsaeoo2",
-    admin_client_secret="Rb4pyxhCpOFsgpS1AldkF8r1axL9eem1",
-    realm="Test",
+    client_id="client-id",
+    client_secret="client_secret",
+    admin_client_secret="admin_client_secret",
+    realm="realm_name",
     callback_uri="http://localhost:8081/callback"
 )
 idp.add_swagger_config(app)
 
-SECRET_KEY = b'-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Eq3ytZLnXoje1NPZW5Cwjh6Y8vnvV8Byo2n0T0RNQvbcEc5NmfJsxYuh5mnCGxlbiucB4zJhFZAdg+1nDpCV1IgUmbBXQmj8cea1qd8Rj8PENAXE52GM5TuXtAMD+U4rKgZj8TQq7XSCp43cYV108B/TXRaaYlVGfNAVNmSscOVlDgq177/4t53nbJhkjRNMzCpZ4LgkMpzDZgl0Vk8bYwRx+wt6XKtrpU2ho5IK3/SxA3ubdTz5GahCNuoxRo90f92EQGHM/v4nKmxsdyhEbKHFFtYx8aKr6SIVOFReUcbgOmT1QN1+qTteA4c1os5gumEVP+pu9MracobYdE4oQIDAQAB\n-----END PUBLIC KEY-----'
+SECRET_KEY = b'-----BEGIN PUBLIC KEY-----\ninsert_public_key\n-----END PUBLIC KEY-----'
 ALGORITHM = 'RS256'                  
 
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='/token',
@@ -42,9 +42,9 @@ class CreateUserRequest(BaseModel):
 # Endpoints
 @app.post("/token", tags=["auth-flow"])
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+
     token_aux = idp.user_login(username=form_data.username, password=form_data.password)
-    #token = token_aux.access_token
-    #return {'access_token': token, 'token_type': 'bearer'}
+
     return token_aux
 
 
@@ -78,13 +78,12 @@ def logout(access_token, refresh_token):
         token_resp = requests.post(url=token_url, json=token_data)
 
         id_token = token_resp.json().get("id_token")
-        print(id_token)
 
         # Logout info 
         data = dict(client_id=user_id, refresh_token=refresh_token)
         body = dict(id_token_hint=id_token)
 
-        resp = requests.post(url=url, params={'client_id':user_id, 'refresh_token':refresh_token}, json=body)
+        resp = requests.post(url=url, params=data, json=body)
 
         if resp.is_redirect:
             redirect_url = resp.headers["Location"]
