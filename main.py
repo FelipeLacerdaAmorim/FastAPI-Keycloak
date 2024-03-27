@@ -61,7 +61,8 @@ def callback(session_state: str, code: str):
 @app.post("/logout", tags=["auth-flow"])
 def logout(access_token, refresh_token):
     try:
-        url = 'http://localhost:8085/realms/Test/protocol/openid-connect/logout'
+        token_url = f'http://localhost:8085/realms/{idp.realm}/protocol/openid-connect/token'
+        url = f'http://localhost:8085/realms/{idp.realm}/protocol/openid-connect/logout'
 
         payload = jwt.decode(access_token, SECRET_KEY, audience="account", algorithms=[ALGORITHM])
         username: str = payload.get('name')
@@ -71,20 +72,29 @@ def logout(access_token, refresh_token):
         
         user_id = payload.get('id')
 
-        data = {'client_id': user_id, 'refresh_token': refresh_token}
+        # Get token hint info
+        token_data = dict(grant_type='client_credentials', client_id=idp.client_id, client_secret=idp.client_secret, scope='openid')
 
-        data = urllib.parse.urlencode(data)
+        token_resp = requests.post(url=token_url, json=token_data)
 
-        resp = requests.get(url=url, params=data, headers=headers)
+        id_token = token_resp.json().get("id_token")
+        print(id_token)
 
-        response = requests.post()
+        # Logout info 
+        data = dict(client_id=user_id, refresh_token=refresh_token)
+        body = dict(id_token_hint=id_token)
 
-        return response
+        resp = requests.post(url=url, params={'client_id':user_id, 'refresh_token':refresh_token}, json=body)
+
+        if resp.is_redirect:
+            redirect_url = resp.headers["Location"]
+            return RedirectResponse(url=redirect_url)
+        
+        return resp.content
     
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail='Could not validate user.')
-    #return idp.logout_uri
 
 
 # Menagement Endpoints
